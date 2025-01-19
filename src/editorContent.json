@@ -1,0 +1,117 @@
+{
+  "nodes": [
+    {
+      "id": "A1",
+      "name": "Start",
+      "shapes": [
+        {
+          "type": "circle",
+          "cx": 0,
+          "cy": 0,
+          "r": 30,
+          "fill": "#2196F3",
+          "stroke": "white",
+          "strokeWidth": 2
+        }
+      ],
+      "layoutConfig": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "A2",
+      "name": "Right",
+      "shapes": [
+        {
+          "type": "rect",
+          "x": -30,
+          "y": -30,
+          "width": 60,
+          "height": 60,
+          "fill": "#4CAF50",
+          "stroke": "white",
+          "strokeWidth": 2
+        }
+      ],
+      "layoutConfig": {
+        "x": 200,
+        "y": 0
+      }
+    },
+    {
+      "id": "B1",
+      "name": "Bottom",
+      "shapes": [
+        {
+          "type": "circle",
+          "cx": 0,
+          "cy": 0,
+          "r": 30,
+          "fill": "#9C27B0",
+          "stroke": "white",
+          "strokeWidth": 2
+        }
+      ],
+      "layoutConfig": {
+        "x": 0,
+        "y": 200
+      }
+    },
+    {
+      "id": "B2",
+      "name": "Diagonal",
+      "shapes": [
+        {
+          "type": "path",
+          "d": "M 0,-30 L 30,0 L 0,30 L -30,0 Z",
+          "fill": "#FF5722",
+          "stroke": "white",
+          "strokeWidth": 2
+        }
+      ],
+      "layoutConfig": {
+        "x": 200,
+        "y": 200
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "A1",
+      "target": "A2",
+      "type": "orthogonal"
+    },
+    {
+      "source": "A1",
+      "target": "B1",
+      "type": "orthogonal"
+    },
+    {
+      "source": "A1",
+      "target": "B2",
+      "type": "diagonal"
+    },
+    {
+      "source": "A2",
+      "target": "B2",
+      "type": "orthogonal"
+    },
+    {
+      "source": "B1",
+      "target": "B2",
+      "type": "orthogonal"
+    }
+  ],
+  "layoutConfig": {
+    "startX": 150,
+    "startY": 150,
+    "columnWidth": 250,
+    "rowHeight": 250,
+    "boxWidth": 100,
+    "boxHeight": 100,
+    "boxMargin": 20,
+    "fontSize": 16,
+    "textMarginTop": 60
+  }
+}

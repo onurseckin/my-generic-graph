@@ -1,0 +1,160 @@
+/* Reset and base styles */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body,
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  overflow: hidden; /* Prevent white space during scroll bounce */
+}
+
+#__next {
+  width: 100%;
+  height: 100%;
+  background: black;
+}
+
+.container {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  min-height: 100vh;
+  background-color: black;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.text-editor {
+  flex: 1;
+  height: 100%;
+  padding: 20px;
+  background-color: #1e1e1e;
+  color: white;
+  overflow: auto;
+  position: relative;
+  transform-origin: top left;
+}
+
+.graph-container {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  background-color: black;
+  overflow: hidden;
+}
+
+.graph-content {
+  width: 100%;
+  height: 100%;
+  transform-origin: center;
+  position: relative;
+  z-index: 1;
+}
+
+.editor-container {
+  position: relative;
+  flex: 1;
+  display: flex;
+}
+
+.editor-textarea {
+  width: 100%;
+  height: 80vh;
+  background: #222;
+  color: white;
+  font-family: monospace;
+  padding: 1rem;
+  font-size: 14px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  resize: both;
+  min-height: 200px;
+  max-height: calc(100vh - 80px);
+  overflow: auto;
+}
+
+.editor-textarea:focus {
+  outline: none;
+  border-color: #666;
+}
+
+.editor-zoom-controls {
+  position: absolute;
+  left: -50px;
+  bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 99999;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.zoom-button {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #333;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.zoom-button:hover {
+  background: #444;
+}
+
+.editor-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #1e1e1e;
+  border-right: 1px solid #333;
+}
+
+.button-controls {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #252525;
+  border-bottom: 1px solid #333;
+}
+
+.control-button {
+  padding: 0.5rem 1rem;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.control-button:hover {
+  opacity: 0.9;
+}
+
+.control-button.play {
+  background: #4caf50;
+}
+
+.control-button.save {
+  background: #2196f3;
+}
