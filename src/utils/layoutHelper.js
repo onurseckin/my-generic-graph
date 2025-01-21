@@ -25,7 +25,6 @@ export const DEFAULT_CONFIG = {
 
 // Validate and normalize format values
 function validateConfig(config = {}) {
-  // Start with empty object instead of DEFAULT_CONFIG
   const result = {};
 
   // Handle each property individually
@@ -33,6 +32,7 @@ function validateConfig(config = {}) {
   result.startY = config.startY ?? DEFAULT_CONFIG.startY;
   result.width = config.width ?? DEFAULT_CONFIG.width;
   result.height = config.height ?? DEFAULT_CONFIG.height;
+  result.columnsPerRow = config.columnsPerRow ?? DEFAULT_CONFIG.columnsPerRow;
 
   // Box configuration with minimums
   result.boxWidth =

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export function useZoom(initialZoom = 1) {
+export function useZoom(initialZoom = 0.5) {
   const [zoom, setZoom] = useState(initialZoom);
 
   const handleZoom = (direction) => {
@@ -10,7 +10,7 @@ export function useZoom(initialZoom = 1) {
     });
   };
 
-  const handleReset = () => setZoom(1);
+  const handleReset = () => setZoom(0.5);
 
   return { zoom, handleZoom, handleReset };
 }
