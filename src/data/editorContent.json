@@ -2,77 +2,152 @@
   "nodes": [
     {
       "id": "A1",
-      "name": "Start",
+      "name": "Direct Connection",
       "shapes": [
         {
           "type": "circle",
           "cx": 0,
           "cy": 0,
-          "r": 30,
-          "fill": "#2196F3",
-          "stroke": "white",
-          "strokeWidth": 2
-        }
-      ],
-      "layoutConfig": {
-        "x": 0,
-        "y": 0
-      }
-    },
-    {
-      "id": "A2",
-      "name": "Right",
-      "shapes": [
-        {
-          "type": "rect",
-          "x": -30,
-          "y": -30,
-          "width": 60,
-          "height": 60,
+          "r": 25,
           "fill": "#4CAF50",
           "stroke": "white",
           "strokeWidth": 2
         }
-      ],
-      "layoutConfig": {
-        "x": 200,
-        "y": 0
-      }
+      ]
     },
     {
-      "id": "B1",
-      "name": "Bottom",
+      "id": "A2",
+      "name": "Direct Target",
       "shapes": [
         {
           "type": "circle",
           "cx": 0,
           "cy": 0,
-          "r": 30,
+          "r": 25,
+          "fill": "#2196F3",
+          "stroke": "white",
+          "strokeWidth": 2
+        }
+      ]
+    },
+    {
+      "id": "B1",
+      "name": "Diagonal Source 1",
+      "shapes": [
+        {
+          "type": "rect",
+          "x": -25,
+          "y": -25,
+          "width": 50,
+          "height": 50,
+          "fill": "#FF9800",
+          "stroke": "white",
+          "strokeWidth": 2
+        }
+      ]
+    },
+    {
+      "id": "B2",
+      "name": "Diagonal Target 1",
+      "shapes": [
+        {
+          "type": "rect",
+          "x": -25,
+          "y": -25,
+          "width": 50,
+          "height": 50,
+          "fill": "#E91E63",
+          "stroke": "white",
+          "strokeWidth": 2
+        }
+      ]
+    },
+    {
+      "id": "B3",
+      "name": "Diagonal Source 2",
+      "shapes": [
+        {
+          "type": "rect",
+          "x": -25,
+          "y": -25,
+          "width": 50,
+          "height": 50,
           "fill": "#9C27B0",
           "stroke": "white",
           "strokeWidth": 2
         }
-      ],
-      "layoutConfig": {
-        "x": 0,
-        "y": 200
-      }
+      ]
     },
     {
-      "id": "B2",
-      "name": "Diagonal",
+      "id": "B4",
+      "name": "Diagonal Target 2",
       "shapes": [
         {
-          "type": "path",
-          "d": "M 0,-30 L 30,0 L 0,30 L -30,0 Z",
-          "fill": "#FF5722",
+          "type": "rect",
+          "x": -25,
+          "y": -25,
+          "width": 50,
+          "height": 50,
+          "fill": "#673AB7",
           "stroke": "white",
           "strokeWidth": 2
         }
-      ],
+      ]
+    },
+    {
+      "id": "C1",
+      "name": "Far Orthogonal 1",
+      "shapes": [
+        {
+          "type": "polygon",
+          "points": "-20,0 0,-20 20,0 0,20",
+          "fill": "#009688",
+          "stroke": "white",
+          "strokeWidth": 2
+        }
+      ]
+    },
+    {
+      "id": "C2",
+      "name": "Far Target 1",
+      "shapes": [
+        {
+          "type": "polygon",
+          "points": "-20,0 0,-20 20,0 0,20",
+          "fill": "#795548",
+          "stroke": "white",
+          "strokeWidth": 2
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "name": "Bits",
       "layoutConfig": {
-        "x": 200,
-        "y": 200
+        "x": 800,
+        "y": 1400
+      },
+      "shapes": [
+        {
+          "type": "path",
+          "d": "M-15,5 L-5,5 L-5,-5 L-15,-5 L-15,5",
+          "fill": "#00FF00",
+          "stroke": "#00FF00",
+          "strokeWidth": 1
+        },
+        {
+          "type": "path",
+          "d": "M5,-5 C12,-5 12,5 5,5 C-2,5 -2,-5 5,-5",
+          "fill": "#00FF00",
+          "stroke": "#00FF00",
+          "strokeWidth": 1
+        }
+      ],
+      "animate": {
+        "type": "blink",
+        "params": {
+          "interval": 500
+        }
       }
     }
   ],
@@ -83,36 +158,32 @@
       "type": "orthogonal"
     },
     {
-      "source": "A1",
-      "target": "B1",
-      "type": "orthogonal"
-    },
-    {
-      "source": "A1",
+      "source": "B1",
       "target": "B2",
       "type": "diagonal"
     },
     {
-      "source": "A2",
-      "target": "B2",
-      "type": "orthogonal"
+      "source": "B3",
+      "target": "B4",
+      "type": "diagonal"
     },
     {
-      "source": "B1",
-      "target": "B2",
+      "source": "C1",
+      "target": "C2",
       "type": "orthogonal"
     }
   ],
   "layoutConfig": {
-    "startX": 150,
-    "startY": 150,
-    "columnWidth": 250,
-    "rowHeight": 250,
-    "boxWidth": 100,
-    "boxHeight": 100,
-    "boxMargin": 20,
-    "fontSize": 16,
-    "textMarginTop": 60,
-    "columnsPerRow": 2
+    "startX": 100,
+    "startY": 100,
+    "columnWidth": 200,
+    "rowHeight": 150,
+    "boxWidth": 80,
+    "boxHeight": 80,
+    "boxMargin": 15,
+    "fontSize": 14,
+    "textMarginTop": 40,
+    "columnsPerRow": 3,
+    "iconUnitSize": 80
   }
 }

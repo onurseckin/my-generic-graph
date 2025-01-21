@@ -1,5 +1,13 @@
 import { DEFAULT_CONFIG } from "./layoutHelper";
 
+// Cache for existing connections
+let connectionCache = new Map();
+
+// Clear cache when needed (e.g., when graph changes)
+function clearRouteCache() {
+  connectionCache.clear();
+}
+
 export {
   getSourcePoint,
   getTargetPoint,
@@ -7,31 +15,50 @@ export {
   getDiagonalRoute,
   isNeighbor,
   isNeighborInGrid,
+  clearRouteCache,
 };
 
-export function getEdgeRoute(sourceNode, targetNode, allNodes) {
-  // Check if nodes are immediate neighbors
-  if (isNeighborInGrid(sourceNode, targetNode)) {
-    return getOrthogonalRoute(sourceNode, targetNode, allNodes);
+export function getEdgeRoute(sourceNode, targetNode, allNodes, edge = {}) {
+  // First check if we should use diagonal routing
+  if (shouldUseDiagonalRoute(sourceNode, targetNode, allNodes, edge)) {
+    return getDiagonalRoute(sourceNode, targetNode, allNodes);
   }
 
-  // Try diagonal first, fall back to orthogonal if needed
-  return getDiagonalRoute(sourceNode, targetNode, allNodes);
+  // Handle explicit edge types
+  switch (edge.type) {
+    case "curved":
+      return getCurvedRoute(sourceNode, targetNode);
+    case "orthogonal":
+      return getOrthogonalRoute(sourceNode, targetNode, allNodes);
+    default:
+      // For complex paths with potential obstacles, use obstacle avoidance
+      if (allNodes.length > 2) {
+        return findPathWithObstacleAvoidance(sourceNode, targetNode, allNodes);
+      }
+      // For simple paths, use orthogonal routing
+      return getOrthogonalRoute(sourceNode, targetNode, allNodes);
+  }
 }
 
 export function getNodeCorners(node) {
-  const iconUnitSize =
-    node.layoutConfig?.iconUnitSize || DEFAULT_CONFIG.iconUnitSize;
   const width = node.layoutConfig?.boxWidth || DEFAULT_CONFIG.boxWidth;
   const height = node.layoutConfig?.boxHeight || DEFAULT_CONFIG.boxHeight;
   const margin = node.layoutConfig?.boxMargin || DEFAULT_CONFIG.boxMargin;
+  const textMarginBottom = node.layoutConfig?.textMarginBottom || 20;
+  const columnWidth =
+    node.layoutConfig?.columnWidth || DEFAULT_CONFIG.columnWidth;
+  const rowHeight = node.layoutConfig?.rowHeight || DEFAULT_CONFIG.rowHeight;
 
-  const halfW = width / 2 + margin;
-  const halfH = height / 2 + margin;
+  // Calculate the effective space needed for the node
+  const effectiveWidth = Math.max(width + 2 * margin, columnWidth * 0.4);
+  const effectiveHeight = Math.max(
+    height + 2 * margin + textMarginBottom,
+    rowHeight * 0.4
+  );
 
   return {
-    topLeft: [node.x - halfW, node.y - halfH],
-    bottomRight: [node.x + halfW, node.y + halfH],
+    topLeft: [node.x - effectiveWidth / 2, node.y - effectiveHeight / 2],
+    bottomRight: [node.x + effectiveWidth / 2, node.y + effectiveHeight / 2],
   };
 }
 
@@ -39,12 +66,15 @@ function getSourcePoint(sourceNode, targetNode, isDiagonal = false) {
   const width = sourceNode.layoutConfig?.boxWidth || DEFAULT_CONFIG.boxWidth;
   const height = sourceNode.layoutConfig?.boxHeight || DEFAULT_CONFIG.boxHeight;
   const margin = sourceNode.layoutConfig?.boxMargin || DEFAULT_CONFIG.boxMargin;
+  const columnWidth =
+    sourceNode.layoutConfig?.columnWidth || DEFAULT_CONFIG.columnWidth;
+  const rowHeight =
+    sourceNode.layoutConfig?.rowHeight || DEFAULT_CONFIG.rowHeight;
   const totalMargin = margin + 10;
   const dx = targetNode.x - sourceNode.x;
   const dy = targetNode.y - sourceNode.y;
 
   if (isDiagonal) {
-    // For diagonal connections, exit from the corner in the direction of the target
     return {
       point: [
         sourceNode.x + Math.sign(dx) * (width / 2 + totalMargin),
@@ -54,38 +84,43 @@ function getSourcePoint(sourceNode, targetNode, isDiagonal = false) {
     };
   }
 
-  // For same row/column connections, ensure proper exit direction
-  if (Math.abs(dy) < 1) {
-    // Same row
-    const direction = dx > 0 ? "right" : "left";
-    return {
-      point: [
-        sourceNode.x +
-          (direction === "right"
-            ? width / 2 + totalMargin
-            : -(width / 2 + totalMargin)),
-        sourceNode.y,
-      ],
-      direction: direction,
-    };
-  } else if (Math.abs(dx) < 1) {
-    // Same column
-    const direction = dy > 0 ? "down" : "up";
-    return {
-      point: [
-        sourceNode.x,
-        sourceNode.y +
-          (direction === "down"
-            ? height / 2 + totalMargin
-            : -(height / 2 + totalMargin)),
-      ],
-      direction: direction,
-    };
+  // Check if nodes are in grid alignment
+  const isGridAligned = isNeighborInGrid(sourceNode, targetNode);
+
+  if (isGridAligned) {
+    // For nodes in the same row
+    if (Math.abs(dy) < rowHeight * 0.1) {
+      const direction = dx > 0 ? "right" : "left";
+      return {
+        point: [
+          sourceNode.x +
+            (direction === "right"
+              ? width / 2 + totalMargin
+              : -(width / 2 + totalMargin)),
+          sourceNode.y,
+        ],
+        direction,
+      };
+    }
+    // For nodes in the same column
+    if (Math.abs(dx) < columnWidth * 0.1) {
+      const direction = dy > 0 ? "down" : "up";
+      return {
+        point: [
+          sourceNode.x,
+          sourceNode.y +
+            (direction === "down"
+              ? height / 2 + totalMargin
+              : -(height / 2 + totalMargin)),
+        ],
+        direction,
+      };
+    }
   }
 
-  // For other connections, use predominant direction
+  // For non-grid or custom positioned nodes, use relative positioning
   if (Math.abs(dx) > Math.abs(dy)) {
-    // Horizontal predominant - exit from left or right
+    // Horizontal predominant
     const direction = dx > 0 ? "right" : "left";
     return {
       point: [
@@ -95,10 +130,10 @@ function getSourcePoint(sourceNode, targetNode, isDiagonal = false) {
             : -(width / 2 + totalMargin)),
         sourceNode.y,
       ],
-      direction: direction,
+      direction,
     };
   } else {
-    // Vertical predominant - exit from top or bottom
+    // Vertical predominant
     const direction = dy > 0 ? "down" : "up";
     return {
       point: [
@@ -108,7 +143,7 @@ function getSourcePoint(sourceNode, targetNode, isDiagonal = false) {
             ? height / 2 + totalMargin
             : -(height / 2 + totalMargin)),
       ],
-      direction: direction,
+      direction,
     };
   }
 }
@@ -123,7 +158,6 @@ function getTargetPoint(sourceNode, targetNode, isDiagonal = false) {
   const dy = targetNode.y - sourceNode.y;
 
   if (isDiagonal) {
-    // For diagonal connections, arrive at the corner from the direction of the source
     return {
       point: [
         targetNode.x - Math.sign(dx) * (width / 2 + totalMargin),
@@ -133,35 +167,39 @@ function getTargetPoint(sourceNode, targetNode, isDiagonal = false) {
     };
   }
 
-  // For same row/column connections, ensure proper arrival direction
-  if (Math.abs(dy) < 1) {
-    // Same row
-    const direction = dx > 0 ? "left" : "right";
-    const x = targetNode.x - Math.sign(dx) * (width / 2 + totalMargin);
-    return {
-      point: [x, targetNode.y],
-      direction: direction,
-      finalSegment: [
-        [x - Math.sign(dx) * arrivalOffset, targetNode.y],
-        [x, targetNode.y],
-      ],
-    };
-  } else if (Math.abs(dx) < 1) {
-    // Same column
-    const direction = dy > 0 ? "up" : "down";
-    const y = targetNode.y - Math.sign(dy) * (height / 2 + totalMargin);
-    return {
-      point: [targetNode.x, y],
-      direction: direction,
-      finalSegment: [
-        [targetNode.x, y - Math.sign(dy) * arrivalOffset],
-        [targetNode.x, y],
-      ],
-    };
+  // For nodes in the same row/column, maintain current behavior
+  if (Math.abs(dy) < 1 || Math.abs(dx) < 1) {
+    if (Math.abs(dy) < 1) {
+      // Same row
+      const direction = dx > 0 ? "left" : "right";
+      const x = targetNode.x - Math.sign(dx) * (width / 2 + totalMargin);
+      return {
+        point: [x, targetNode.y],
+        direction: direction,
+        finalSegment: [
+          [x - Math.sign(dx) * arrivalOffset, targetNode.y],
+          [x, targetNode.y],
+        ],
+      };
+    } else {
+      // Same column
+      const direction = dy > 0 ? "up" : "down";
+      const y = targetNode.y - Math.sign(dy) * (height / 2 + totalMargin);
+      return {
+        point: [targetNode.x, y],
+        direction: direction,
+        finalSegment: [
+          [targetNode.x, y - Math.sign(dy) * arrivalOffset],
+          [targetNode.x, y],
+        ],
+      };
+    }
   }
 
-  // For other connections, use predominant direction
-  if (Math.abs(dx) > Math.abs(dy)) {
+  // For other connections, prioritize horizontal arrival if source is significantly to the side
+  const isSignificantlyHorizontal = Math.abs(dx) > Math.abs(dy) * 1.5;
+
+  if (isSignificantlyHorizontal) {
     const direction = dx > 0 ? "left" : "right";
     const x = targetNode.x - Math.sign(dx) * (width / 2 + totalMargin);
     return {
@@ -187,38 +225,47 @@ function getTargetPoint(sourceNode, targetNode, isDiagonal = false) {
 }
 
 function getDiagonalRoute(sourceNode, targetNode, allNodes) {
+  const sourceConnection = getSourcePoint(sourceNode, targetNode, true);
+  const targetConnection = getTargetPoint(sourceNode, targetNode, true);
   const dx = targetNode.x - sourceNode.x;
   const dy = targetNode.y - sourceNode.y;
 
-  // Calculate diagonal exit and entry points
-  const width = sourceNode.layoutConfig?.boxWidth || DEFAULT_CONFIG.boxWidth;
-  const height = sourceNode.layoutConfig?.boxHeight || DEFAULT_CONFIG.boxHeight;
-  const margin = sourceNode.layoutConfig?.boxMargin || DEFAULT_CONFIG.boxMargin;
-  const totalMargin = margin + 10;
-
   // Calculate diagonal points
-  const sourcePoint = [
-    sourceNode.x + Math.sign(dx) * (width / 2 + totalMargin),
-    sourceNode.y + Math.sign(dy) * (height / 2 + totalMargin),
-  ];
+  const points = [sourceConnection.point];
 
-  const targetPoint = [
-    targetNode.x - Math.sign(dx) * (width / 2 + totalMargin),
-    targetNode.y - Math.sign(dy) * (height / 2 + totalMargin),
-  ];
-
-  // Check if path is clear
-  const directPath = [sourcePoint, targetPoint];
+  // Check if direct path is clear
+  const directPath = [sourceConnection.point, targetConnection.point];
   const otherNodes = allNodes.filter(
     (node) => node !== sourceNode && node !== targetNode
   );
 
   if (!hasIntersections(directPath, otherNodes, sourceNode, targetNode)) {
-    return directPath;
+    points.push(targetConnection.point);
+    return points;
   }
 
-  // If diagonal path is blocked, fall back to orthogonal
-  return getOrthogonalRoute(sourceNode, targetNode, allNodes);
+  // If diagonal path is blocked, create a detour
+  const margin = sourceNode.layoutConfig?.boxMargin || DEFAULT_CONFIG.boxMargin;
+  const extraMargin = margin * 2;
+
+  // Add midpoint for detour
+  const midPoint = [
+    sourceConnection.point[0] + dx * 0.5,
+    sourceConnection.point[1] + dy * 0.5,
+  ];
+
+  // Offset the midpoint perpendicular to the path
+  const perpDistance = extraMargin;
+  const pathAngle = Math.atan2(dy, dx);
+  const perpAngle = pathAngle + Math.PI / 2;
+
+  midPoint[0] += perpDistance * Math.cos(perpAngle);
+  midPoint[1] += perpDistance * Math.sin(perpAngle);
+
+  points.push(midPoint);
+  points.push(targetConnection.point);
+
+  return points;
 }
 
 function isNeighbor(dx, dy, columnWidth, rowHeight) {
@@ -232,138 +279,324 @@ function isNeighbor(dx, dy, columnWidth, rowHeight) {
 function isNeighborInGrid(sourceNode, targetNode) {
   const dx = targetNode.x - sourceNode.x;
   const dy = targetNode.y - sourceNode.y;
-  const gridSpacing = 500;
+  const columnWidth =
+    sourceNode.layoutConfig?.columnWidth || DEFAULT_CONFIG.columnWidth;
+  const rowHeight =
+    sourceNode.layoutConfig?.rowHeight || DEFAULT_CONFIG.rowHeight;
 
-  // Convert actual distances to grid units
-  const gridUnitsX = Math.abs(dx) / gridSpacing;
-  const gridUnitsY = Math.abs(dy) / gridSpacing;
+  // For nodes in the same row
+  const isHorizontalNeighbor =
+    Math.abs(dy) < rowHeight * 0.1 && Math.abs(dx) <= columnWidth * 1.5;
 
-  // Direct neighbors: exactly one grid unit apart in either x or y, aligned in the other
-  const isDirectNeighbor =
-    (Math.abs(gridUnitsX - 1) < 0.1 && gridUnitsY < 0.1) || // Horizontal neighbor
-    (Math.abs(gridUnitsY - 1) < 0.1 && gridUnitsX < 0.1); // Vertical neighbor
-  return isDirectNeighbor;
+  // For nodes in the same column
+  const isVerticalNeighbor =
+    Math.abs(dx) < columnWidth * 0.1 && Math.abs(dy) <= rowHeight * 1.5;
+
+  return isHorizontalNeighbor || isVerticalNeighbor;
 }
 
 function getOrthogonalRoute(sourceNode, targetNode, allNodes) {
+  // Get layout configuration with fallbacks
+  const margin = sourceNode.layoutConfig?.boxMargin || DEFAULT_CONFIG.boxMargin;
+  const boxWidth = sourceNode.layoutConfig?.boxWidth || DEFAULT_CONFIG.boxWidth;
+  const boxHeight =
+    sourceNode.layoutConfig?.boxHeight || DEFAULT_CONFIG.boxHeight;
+  const columnWidth =
+    sourceNode.layoutConfig?.columnWidth || DEFAULT_CONFIG.columnWidth;
+  const rowHeight =
+    sourceNode.layoutConfig?.rowHeight || DEFAULT_CONFIG.rowHeight;
+
+  // For neighbors, use direct connection
+  if (isNeighborInGrid(sourceNode, targetNode)) {
+    const sourceConnection = getSourcePoint(sourceNode, targetNode);
+    const targetConnection = getTargetPoint(sourceNode, targetNode);
+    return [sourceConnection.point, targetConnection.point];
+  }
+
+  // Create cache key for this node pair
+  const cacheKey = `${sourceNode.id}-${targetNode.id}`;
+  if (connectionCache.has(cacheKey)) {
+    return connectionCache.get(cacheKey);
+  }
+
+  // Pre-calculate node boxes with border barriers
+  const nodeBoxes = new Map();
+  allNodes.forEach((node) => {
+    if (node !== sourceNode && node !== targetNode) {
+      const corners = getNodeCorners(node);
+      const width = node.layoutConfig?.boxWidth || DEFAULT_CONFIG.boxWidth;
+      const height = node.layoutConfig?.boxHeight || DEFAULT_CONFIG.boxHeight;
+      const nodeMargin =
+        node.layoutConfig?.boxMargin || DEFAULT_CONFIG.boxMargin;
+      const borderSpace = Math.max(
+        nodeMargin * 2,
+        Math.min(columnWidth, rowHeight) * 0.15
+      );
+
+      nodeBoxes.set(node.id, {
+        topLeft: [
+          corners.topLeft[0] - borderSpace,
+          corners.topLeft[1] - borderSpace,
+        ],
+        bottomRight: [
+          corners.bottomRight[0] + borderSpace,
+          corners.bottomRight[1] + borderSpace,
+        ],
+      });
+    }
+  });
+
+  // Get primary connection points
+  const sourceConnection = getSourcePoint(sourceNode, targetNode);
+  const targetConnection = getTargetPoint(sourceNode, targetNode);
+
+  // Try direct path first
+  const directPath = [
+    sourceConnection.point,
+    ...(targetConnection.finalSegment || [targetConnection.point]),
+  ];
+
+  if (!hasIntersections(directPath, allNodes, sourceNode, targetNode)) {
+    connectionCache.set(cacheKey, directPath);
+    return directPath;
+  }
+
+  // If direct path fails, try alternative connection points
+  const sourcePoints = [sourceConnection];
+  const targetPoints = [
+    targetConnection,
+    getTargetPoint({ ...sourceNode, x: targetNode.x + boxWidth }, targetNode), // Force left entry
+    getTargetPoint({ ...sourceNode, x: targetNode.x - boxWidth }, targetNode), // Force right entry
+    getTargetPoint({ ...sourceNode, y: targetNode.y - boxHeight }, targetNode), // Force down entry
+    getTargetPoint({ ...sourceNode, y: targetNode.y + boxHeight }, targetNode), // Force up entry
+  ];
+
+  let bestPath = null;
+  let bestScore = Infinity;
+
+  // Try each combination of source and target points
+  for (const source of sourcePoints) {
+    for (const target of targetPoints) {
+      // Skip if this target point is already used by another connection
+      const existingPaths = Array.from(connectionCache.values());
+      const isTargetUsed = existingPaths.some((path) => {
+        const existingTarget = path[path.length - 1];
+        const dx = existingTarget[0] - target.point[0];
+        const dy = existingTarget[1] - target.point[1];
+        return Math.abs(dx) < 20 && Math.abs(dy) < 20;
+      });
+
+      if (isTargetUsed) {
+        continue;
+      }
+
+      // Generate Manhattan-style paths
+      const paths = generateOrthogonalPaths(source, target, margin);
+
+      for (const path of paths) {
+        // Add final segment if available
+        const fullPath = target.finalSegment
+          ? [...path.slice(0, -1), ...target.finalSegment]
+          : path;
+
+        // Check for intersections with nodes
+        if (hasIntersections(fullPath, allNodes, sourceNode, targetNode)) {
+          continue;
+        }
+
+        const score = evaluatePath(fullPath, nodeBoxes);
+        if (score < bestScore) {
+          bestScore = score;
+          bestPath = fullPath;
+        }
+      }
+    }
+  }
+
+  // Use the best path found or fallback to direct connection
+  const finalPath = bestPath || directPath;
+  connectionCache.set(cacheKey, finalPath);
+  return finalPath;
+}
+
+// Helper function to generate orthogonal paths between points
+function generateOrthogonalPaths(source, target, margin) {
+  const [sx, sy] = source.point;
+  const [tx, ty] = target.point;
+  const paths = [];
+
+  // Helper to create path with proper spacing
+  function createPath(points) {
+    return points.filter((p, i, arr) => {
+      if (i === 0 || i === arr.length - 1) return true;
+      const prev = arr[i - 1];
+      const next = arr[i + 1];
+      return !(prev[0] === next[0] && prev[1] === next[1]);
+    });
+  }
+
+  // Path 1: Horizontal then Vertical
+  paths.push(createPath([source.point, [tx, sy], target.point]));
+
+  // Path 2: Vertical then Horizontal
+  paths.push(createPath([source.point, [sx, ty], target.point]));
+
+  // Path 3: Using midpoint for more natural flow
+  const midX = (sx + tx) / 2;
+  const midY = (sy + ty) / 2;
+
+  if (source.direction === "right" || source.direction === "left") {
+    paths.push(
+      createPath([source.point, [midX, sy], [midX, ty], target.point])
+    );
+  } else {
+    paths.push(
+      createPath([source.point, [sx, midY], [tx, midY], target.point])
+    );
+  }
+
+  return paths;
+}
+
+// Function to evaluate path quality
+function evaluatePath(path, nodeBoxes) {
+  // Calculate base score from path length (shortest path preferred)
+  let score = 0;
+  for (let i = 0; i < path.length - 1; i++) {
+    score +=
+      Math.abs(path[i + 1][0] - path[i][0]) +
+      Math.abs(path[i + 1][1] - path[i][1]);
+  }
+
+  // Check for self-intersections (TOP Priority)
+  for (let i = 0; i < path.length - 2; i++) {
+    for (let j = i + 2; j < path.length - 1; j++) {
+      if (
+        linesIntersect(
+          path[i][0],
+          path[i][1],
+          path[i + 1][0],
+          path[i + 1][1],
+          path[j][0],
+          path[j][1],
+          path[j + 1][0],
+          path[j + 1][1]
+        )
+      ) {
+        return Infinity;
+      }
+    }
+  }
+
+  // Check for node intersections (Second Priority)
+  for (let i = 0; i < path.length - 1; i++) {
+    if (
+      segmentIntersectsNodes(
+        path[i][0],
+        path[i][1],
+        path[i + 1][0],
+        path[i + 1][1],
+        nodeBoxes
+      )
+    ) {
+      return Infinity;
+    }
+  }
+
+  // Check for existing connections at the target point (Third Priority)
+  const targetPoint = path[path.length - 1];
+  const existingPaths = Array.from(connectionCache.values());
+  const arrivalThreshold = 20; // Threshold for considering points as overlapping
+
+  for (const existingPath of existingPaths) {
+    const existingTarget = existingPath[existingPath.length - 1];
+    const dx = existingTarget[0] - targetPoint[0];
+    const dy = existingTarget[1] - targetPoint[1];
+    if (Math.abs(dx) < arrivalThreshold && Math.abs(dy) < arrivalThreshold) {
+      score += 1000; // Significant penalty for overlapping arrival points
+      break;
+    }
+  }
+
+  return score;
+}
+
+function getCurvedRoute(sourceNode, targetNode) {
   const sourceConnection = getSourcePoint(sourceNode, targetNode);
   const targetConnection = getTargetPoint(sourceNode, targetNode);
   const dx = targetNode.x - sourceNode.x;
   const dy = targetNode.y - sourceNode.y;
   const margin = sourceNode.layoutConfig?.boxMargin || DEFAULT_CONFIG.boxMargin;
-  const extraMargin = margin * 3;
+  const extraMargin = margin * 2;
 
+  // Calculate control points that respect departure and arrival directions
   const points = [sourceConnection.point];
 
-  // First segment must strictly follow the departure direction
-  const firstSegmentLength = extraMargin * 1.5;
-  let firstSegmentPoint;
-
+  // First control point follows source direction
+  const cp1Distance = Math.min(Math.abs(dx), Math.abs(dy)) * 0.5 + extraMargin;
+  let cp1;
   switch (sourceConnection.direction) {
     case "right":
-      firstSegmentPoint = [
-        sourceConnection.point[0] + firstSegmentLength,
+      cp1 = [
+        sourceConnection.point[0] + cp1Distance,
         sourceConnection.point[1],
       ];
       break;
     case "left":
-      firstSegmentPoint = [
-        sourceConnection.point[0] - firstSegmentLength,
+      cp1 = [
+        sourceConnection.point[0] - cp1Distance,
         sourceConnection.point[1],
       ];
       break;
     case "up":
-      firstSegmentPoint = [
+      cp1 = [
         sourceConnection.point[0],
-        sourceConnection.point[1] - firstSegmentLength,
+        sourceConnection.point[1] - cp1Distance,
       ];
       break;
     case "down":
-      firstSegmentPoint = [
+      cp1 = [
         sourceConnection.point[0],
-        sourceConnection.point[1] + firstSegmentLength,
+        sourceConnection.point[1] + cp1Distance,
       ];
       break;
     default:
+      cp1 = sourceConnection.point;
+  }
+
+  // Second control point leads into target direction
+  const cp2Distance = Math.min(Math.abs(dx), Math.abs(dy)) * 0.5 + extraMargin;
+  let cp2;
+  switch (targetConnection.direction) {
+    case "left":
+      cp2 = [
+        targetConnection.point[0] - cp2Distance,
+        targetConnection.point[1],
+      ];
       break;
-  }
-  points.push(firstSegmentPoint);
-
-  // Handle same row/column cases with intersection checking
-  if (Math.abs(dy) < 1 || Math.abs(dx) < 1) {
-    const hasIntersectingNodes = allNodes.some((node) => {
-      if (node === sourceNode || node === targetNode) return false;
-
-      if (Math.abs(dy) < 1) {
-        const minX = Math.min(sourceNode.x, targetNode.x);
-        const maxX = Math.max(sourceNode.x, targetNode.x);
-        return (
-          Math.abs(node.y - sourceNode.y) < node.layoutConfig?.boxHeight &&
-          node.x > minX &&
-          node.x < maxX
-        );
-      } else {
-        const minY = Math.min(sourceNode.y, targetNode.y);
-        const maxY = Math.max(sourceNode.y, targetNode.y);
-        return (
-          Math.abs(node.x - sourceNode.x) < node.layoutConfig?.boxWidth &&
-          node.y > minY &&
-          node.y < maxY
-        );
-      }
-    });
-
-    if (hasIntersectingNodes) {
-      // Add detour after first segment
-      if (Math.abs(dy) < 1) {
-        points.push([firstSegmentPoint[0], sourceNode.y + extraMargin * 2]);
-        points.push([
-          targetConnection.finalSegment[0][0],
-          sourceNode.y + extraMargin * 2,
-        ]);
-      } else {
-        points.push([sourceNode.x + extraMargin * 2, firstSegmentPoint[1]]);
-        points.push([
-          sourceNode.x + extraMargin * 2,
-          targetConnection.finalSegment[0][1],
-        ]);
-      }
-    }
-
-    points.push(targetConnection.finalSegment[0]);
-    points.push(targetConnection.finalSegment[1]);
-    return points;
+    case "right":
+      cp2 = [
+        targetConnection.point[0] + cp2Distance,
+        targetConnection.point[1],
+      ];
+      break;
+    case "up":
+      cp2 = [
+        targetConnection.point[0],
+        targetConnection.point[1] - cp2Distance,
+      ];
+      break;
+    case "down":
+      cp2 = [
+        targetConnection.point[0],
+        targetConnection.point[1] + cp2Distance,
+      ];
+      break;
+    default:
+      cp2 = targetConnection.point;
   }
 
-  // For other cases, continue path after first segment
-  if (Math.abs(dx) > Math.abs(dy)) {
-    points.push([firstSegmentPoint[0], targetConnection.finalSegment[0][1]]);
-  } else {
-    points.push([targetConnection.finalSegment[0][0], firstSegmentPoint[1]]);
-  }
-
-  points.push(targetConnection.finalSegment[0]);
-  points.push(targetConnection.finalSegment[1]);
-
-  return points;
-}
-
-function getCurvedRoute(sourceNode, targetNode) {
-  const { source, target } = determineOptimalConnectionPoints(
-    sourceNode,
-    targetNode
-  );
-
-  // Use cubic bezier curve for smooth bending
-  const dx = target.point[0] - source.point[0];
-  const midX = source.point[0] + dx * 0.5;
-
-  return [
-    source.point,
-    [midX, source.point[1]],
-    [midX, target.point[1]],
-    target.point,
-  ];
+  return [sourceConnection.point, cp1, cp2, targetConnection.point];
 }
 
 function shouldUseDiagonalRoute(sourceNode, targetNode, allNodes, edge) {
@@ -715,4 +948,38 @@ function generateManhattanRoute(source, target) {
 
   points.push(target.point);
   return points;
+}
+
+// Function to check if a path segment intersects with any node's border space
+function segmentIntersectsNodes(x1, y1, x2, y2, nodeBoxes) {
+  for (const [nodeId, box] of nodeBoxes) {
+    if (
+      lineIntersectsBox(
+        x1,
+        y1,
+        x2,
+        y2,
+        box.topLeft[0],
+        box.topLeft[1],
+        box.bottomRight[0],
+        box.bottomRight[1]
+      )
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Helper function to check if two line segments intersect
+function linesIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
+  // Calculate denominators for intersection check
+  const denom = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+  if (denom === 0) return false; // Lines are parallel
+
+  const ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denom;
+  const ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denom;
+
+  // Check if intersection point lies within both line segments
+  return ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1;
 }

@@ -18,13 +18,37 @@ export default function AnimatedEdge({
   // Get the routed path points
   const points = getEdgeRoute(sourceNode, targetNode, allNodes, edge);
 
-  // Construct the path string
+  // Construct the path string based on edge type
   const pathD = points.reduce((path, [x, y], i) => {
-    if (edge.type === "curved" && i > 0) {
-      // Use curved line segments
-      return path + ` Q ${x},${y}`;
+    if (i === 0) return `M ${x},${y}`;
+
+    switch (edge.type) {
+      case "curved":
+        // For curved type, use quadratic bezier curves
+        const prevPoint = points[i - 1];
+        const midX = (prevPoint[0] + x) / 2;
+        const midY = (prevPoint[1] + y) / 2;
+        return `${path} Q ${midX},${midY} ${x},${y}`;
+
+      case "diagonal":
+        // For diagonal type, use direct lines
+        return `${path} L ${x},${y}`;
+
+      case "orthogonal":
+        // For orthogonal type, ensure right angles
+        const prev = points[i - 1];
+        if (prev[0] === x || prev[1] === y) {
+          // If points align horizontally or vertically, direct line
+          return `${path} L ${x},${y}`;
+        } else {
+          // Create a right angle using two line segments
+          return `${path} L ${prev[0]},${y} L ${x},${y}`;
+        }
+
+      default:
+        // Default to straight lines
+        return `${path} L ${x},${y}`;
     }
-    return path + (i === 0 ? `M ${x},${y}` : ` L ${x},${y}`);
   }, "");
 
   return (

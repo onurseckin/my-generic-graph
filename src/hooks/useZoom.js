@@ -5,8 +5,8 @@ export function useZoom(initialZoom = 1) {
 
   const handleZoom = (direction) => {
     setZoom((prev) => {
-      if (direction === "in") return Math.min(prev + 0.2, 3);
-      return Math.max(prev - 0.2, 0.3);
+      if (direction === "in") return Math.min(prev + 0.1, 3);
+      return Math.max(prev - 0.1, 0.3);
     });
   };
 

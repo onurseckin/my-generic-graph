@@ -94,51 +94,134 @@ function validateConfig(config = {}) {
 
 export function arrangeInGrid(input = {}) {
   const nodesArray = input?.nodes || [];
+  const edgesArray = input?.edges || [];
   const mainLayoutConfig = validateConfig(input?.layoutConfig || {});
 
-  const result = {
-    nodes: nodesArray.map((node, index) => {
-      // Calculate grid positions
-      const columnsPerRow =
-        mainLayoutConfig.columnsPerRow || DEFAULT_CONFIG.columnsPerRow;
-      const row = Math.floor(index / columnsPerRow);
-      const col = index % columnsPerRow;
+  // Calculate scaling factors based on default values
+  const columnScale = mainLayoutConfig.columnWidth / DEFAULT_CONFIG.columnWidth;
+  const rowScale = mainLayoutConfig.rowHeight / DEFAULT_CONFIG.rowHeight;
 
-      // Calculate base grid position
-      const gridX =
-        mainLayoutConfig.startX +
-        col * Math.max(mainLayoutConfig.columnWidth, 50);
-      const gridY =
-        mainLayoutConfig.startY +
-        row * Math.max(mainLayoutConfig.rowHeight, 50);
+  // Process nodes first to have their positions for edge calculations
+  const processedNodes = nodesArray.map((node, index) => {
+    // Calculate grid positions
+    const columnsPerRow =
+      mainLayoutConfig.columnsPerRow || DEFAULT_CONFIG.columnsPerRow;
+    const row = Math.floor(index / columnsPerRow);
+    const col = index % columnsPerRow;
 
-      // Create node config by merging main config with node-specific config
-      const nodeConfig = validateConfig({
-        ...mainLayoutConfig,
-        ...(node.layoutConfig || {}),
-      });
+    // Calculate base grid position
+    const gridX =
+      mainLayoutConfig.startX +
+      col * Math.max(mainLayoutConfig.columnWidth, 50);
+    const gridY =
+      mainLayoutConfig.startY + row * Math.max(mainLayoutConfig.rowHeight, 50);
 
-      // Use node's specified position or grid position
-      const finalX =
-        node.layoutConfig?.x !== undefined
-          ? node.layoutConfig.x + mainLayoutConfig.startX
-          : gridX;
-      const finalY =
-        node.layoutConfig?.y !== undefined
-          ? node.layoutConfig.y + mainLayoutConfig.startY
-          : gridY;
+    // Create node config by merging main config with node-specific config
+    const nodeConfig = validateConfig({
+      ...mainLayoutConfig,
+      ...(node.layoutConfig || {}),
+    });
 
-      return {
-        ...node,
-        x: finalX,
-        y: finalY,
-        layoutConfig: nodeConfig,
-      };
-    }),
+    // Get base position (either from layoutConfig or grid)
+    const baseX =
+      node.layoutConfig?.x !== undefined
+        ? node.layoutConfig.x
+        : gridX - mainLayoutConfig.startX;
+    const baseY =
+      node.layoutConfig?.y !== undefined
+        ? node.layoutConfig.y
+        : gridY - mainLayoutConfig.startY;
+
+    // Apply scaling to the relative positions
+    const scaledX = baseX * columnScale;
+    const scaledY = baseY * rowScale;
+
+    // Add startX/startY back to get final position
+    const finalX = mainLayoutConfig.startX + scaledX;
+    const finalY = mainLayoutConfig.startY + scaledY;
+
+    return {
+      ...node,
+      x: finalX,
+      y: finalY,
+      layoutConfig: nodeConfig,
+    };
+  });
+
+  // Create a map of node positions for edge processing
+  const nodePositions = {};
+  processedNodes.forEach((node) => {
+    nodePositions[node.id] = {
+      x: node.x,
+      y: node.y,
+    };
+  });
+
+  // Process edges with scaled positions
+  const processedEdges = edgesArray.map((edge) => {
+    const sourcePos = nodePositions[edge.source];
+    const targetPos = nodePositions[edge.target];
+
+    if (!sourcePos || !targetPos) {
+      console.warn(
+        `Missing node position for edge: ${edge.source} -> ${edge.target}`
+      );
+      return edge;
+    }
+
+    // Calculate control points for the edge (if needed)
+    const controlPoints = calculateControlPoints(
+      sourcePos,
+      targetPos,
+      columnScale,
+      rowScale
+    );
+
+    return {
+      ...edge,
+      sourceX: sourcePos.x,
+      sourceY: sourcePos.y,
+      targetX: targetPos.x,
+      targetY: targetPos.y,
+      ...controlPoints,
+    };
+  });
+
+  return {
+    nodes: processedNodes,
+    edges: processedEdges,
     config: mainLayoutConfig,
   };
+}
 
-  return result;
+// Helper function to calculate control points for edges
+function calculateControlPoints(source, target, columnScale, rowScale) {
+  // Calculate the midpoint
+  const midX = (source.x + target.x) / 2;
+  const midY = (source.y + target.y) / 2;
+
+  // Calculate the distance between points
+  const dx = target.x - source.x;
+  const dy = target.y - source.y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  // Calculate angle between points
+  const angle = Math.atan2(dy, dx);
+
+  // Use fixed base offset that's proportional to distance but not affected by scaling
+  const baseOffset = Math.min(distance * 0.2, 50);
+
+  // Calculate perpendicular offset
+  const perpX = Math.cos(angle - Math.PI / 2) * baseOffset;
+  const perpY = Math.sin(angle - Math.PI / 2) * baseOffset;
+
+  // Create control points perpendicular to the line between points
+  return {
+    controlPoint1X: midX + perpX,
+    controlPoint1Y: midY + perpY,
+    controlPoint2X: midX + perpX,
+    controlPoint2Y: midY + perpY,
+  };
 }
 
 export const formatGraphData = (jsonString) => {

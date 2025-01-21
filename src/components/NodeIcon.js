@@ -384,6 +384,24 @@ function useAnimationAttributes(
       result.filter = "url(#glow)";
       break;
 
+    case "rapidColorChange": {
+      const colors = [
+        "#FF0000", // Red
+        "#00FF00", // Green
+        "#0000FF", // Blue
+        "#FFFF00", // Yellow
+        "#FF00FF", // Magenta
+        "#00FFFF", // Cyan
+        "#FFA500", // Orange
+        "#800080", // Purple
+      ];
+      const interval = 0.1; // 0.1 seconds per color
+      const colorIndex = Math.floor(time / interval) % colors.length;
+      result.fill = colors[colorIndex];
+      result.stroke = colors[(colorIndex + 1) % colors.length];
+      break;
+    }
+
     default:
       break;
   }
