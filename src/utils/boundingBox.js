@@ -20,9 +20,11 @@ export function getEdgeRoute(sourceNode, targetNode, allNodes) {
 }
 
 export function getNodeCorners(node) {
-  const width = node.layoutConfig?.boxWidth || 100;
-  const height = node.layoutConfig?.boxHeight || 140;
-  const margin = node.layoutConfig?.boxMargin || 15;
+  const iconUnitSize =
+    node.layoutConfig?.iconUnitSize || DEFAULT_CONFIG.iconUnitSize;
+  const width = node.layoutConfig?.boxWidth || DEFAULT_CONFIG.boxWidth;
+  const height = node.layoutConfig?.boxHeight || DEFAULT_CONFIG.boxHeight;
+  const margin = node.layoutConfig?.boxMargin || DEFAULT_CONFIG.boxMargin;
 
   const halfW = width / 2 + margin;
   const halfH = height / 2 + margin;

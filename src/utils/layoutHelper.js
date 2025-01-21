@@ -10,17 +10,21 @@ export const DEFAULT_CONFIG = {
   // Node box configuration
   boxWidth: 100,
   boxHeight: 100,
-  boxMargin: 50,
+  boxMargin: 20,
   // Text configuration
   fontSize: 24,
-  textMarginTop: 20,
+  textMarginTop: 75,
   // SVG viewport control
-  svgWidth: 100,
-  svgHeight: 100,
+  svgWidth: 120,
+  svgHeight: 120,
   viewBoxWidth: 100,
   viewBoxHeight: 100,
   viewBoxMinX: 0,
   viewBoxMinY: 0,
+  // New single source of truth for icon scaling:
+  iconUnitSize: 3, // or whatever default you want
+  // NEW: maximum allowed icon scale
+  maxIconSize: 3,
 };
 
 // Validate and normalize format values
@@ -72,6 +76,18 @@ function validateConfig(config = {}) {
   result.viewBoxHeight = config.viewBoxHeight ?? DEFAULT_CONFIG.viewBoxHeight;
   result.viewBoxMinX = config.viewBoxMinX ?? DEFAULT_CONFIG.viewBoxMinX;
   result.viewBoxMinY = config.viewBoxMinY ?? DEFAULT_CONFIG.viewBoxMinY;
+
+  // Our new iconUnitSize:
+  result.iconUnitSize =
+    config.iconUnitSize !== undefined
+      ? Math.max(config.iconUnitSize, 1)
+      : DEFAULT_CONFIG.iconUnitSize;
+
+  // NEW: read or default to maxIconSize
+  result.maxIconSize =
+    config.maxIconSize !== undefined
+      ? Math.max(config.maxIconSize, 1)
+      : DEFAULT_CONFIG.maxIconSize;
 
   return result;
 }
@@ -133,7 +149,7 @@ export const formatGraphData = (jsonString) => {
       .replace(/:\s*"([^"]*?)\s+"/g, ':"$1"')
       // Convert numeric strings to numbers (except for specific fields)
       .replace(
-        /"(x|y|cx|cy|r|width|height|x1|x2|y1|y2|fontSize|startX|startY|columnWidth|rowHeight|boxWidth|boxHeight|boxMargin|textMarginTop|columnsPerRow)":\s*"?(-?\d+\.?\d*)"?/g,
+        /"(x|y|cx|cy|r|width|height|x1|x2|y1|y2|fontSize|startX|startY|columnWidth|rowHeight|boxWidth|boxHeight|boxMargin|textMarginTop|columnsPerRow|iconUnitSize|maxIconSize)":\s*"?(-?\d+\.?\d*)"?/g,
         '"$1":$2'
       )
       // Fix property names with leading spaces
@@ -159,8 +175,11 @@ export const formatGraphData = (jsonString) => {
         boxHeight: Number(parsed.layoutConfig?.boxHeight) || 100,
         boxMargin: Number(parsed.layoutConfig?.boxMargin) || 20,
         fontSize: Number(parsed.layoutConfig?.fontSize) || 24,
-        textMarginTop: Number(parsed.layoutConfig?.textMarginTop) || 100,
+        textMarginTop: Number(parsed.layoutConfig?.textMarginTop) || 75,
         columnsPerRow: Number(parsed.layoutConfig?.columnsPerRow) || 2,
+        // NEW: parse iconUnitSize and maxIconSize
+        iconUnitSize: Number(parsed.layoutConfig?.iconUnitSize) || 1,
+        maxIconSize: Number(parsed.layoutConfig?.maxIconSize) || 12,
       },
     };
 

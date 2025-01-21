@@ -1,118 +1,423 @@
 {
   "nodes": [
     {
-      "id": "A1",
-      "name": "Start",
+      "id": "Field",
+      "name": "Quantum Field",
       "shapes": [
         {
           "type": "circle",
           "cx": 0,
           "cy": 0,
-          "r": 30,
-          "fill": "#2196F3",
-          "stroke": "white",
-          "strokeWidth": 2
+          "r": 3,
+          "fill": "#44AAFF"
         }
       ],
-      "layoutConfig": {
-        "x": 0,
-        "y": 0
+      "animate": {
+        "type": "rotateTrio",
+        "params": {
+          "speed": 0.3
+        }
       }
     },
     {
-      "id": "A2",
-      "name": "Right",
+      "id": "Q",
+      "name": "Quanta",
       "shapes": [
         {
-          "type": "rect",
-          "x": -30,
-          "y": -30,
-          "width": 60,
-          "height": 60,
-          "fill": "#4CAF50",
-          "stroke": "white",
-          "strokeWidth": 2
+          "type": "g",
+          "children": [
+            {
+              "type": "circle",
+              "cx": -3,
+              "cy": 0,
+              "r": 2,
+              "fill": "#FFFF55"
+            },
+            {
+              "type": "circle",
+              "cx": 0,
+              "cy": 0,
+              "r": 2,
+              "fill": "#FFFF55"
+            },
+            {
+              "type": "circle",
+              "cx": 3,
+              "cy": 0,
+              "r": 2,
+              "fill": "#FFFF55"
+            }
+          ]
         }
       ],
-      "layoutConfig": {
-        "x": 200,
-        "y": 0
+      "animate": {
+        "type": "beat",
+        "params": {
+          "speed": 0.3,
+          "scaleRange": 0.3
+        }
       }
     },
     {
-      "id": "B1",
-      "name": "Bottom",
-      "shapes": [
-        {
-          "type": "circle",
-          "cx": 0,
-          "cy": 0,
-          "r": 30,
-          "fill": "#9C27B0",
-          "stroke": "white",
-          "strokeWidth": 2
-        }
-      ],
-      "layoutConfig": {
-        "x": 0,
-        "y": 200
-      }
-    },
-    {
-      "id": "B2",
-      "name": "Diagonal",
+      "id": "E",
+      "name": "Energy",
       "shapes": [
         {
           "type": "path",
-          "d": "M 0,-30 L 30,0 L 0,30 L -30,0 Z",
-          "fill": "#FF5722",
-          "stroke": "white",
-          "strokeWidth": 2
+          "d": "M0,-4 L1,-1 L4,0 L1,1 L0,4 L-1,1 L-4,0 L-1,-1 Z",
+          "fill": "#FFDD00"
         }
       ],
-      "layoutConfig": {
-        "x": 200,
-        "y": 200
+      "animate": {
+        "type": "pulse",
+        "params": {
+          "speed": 0.3,
+          "colors": [
+            "#FFDD00",
+            "#FFA500"
+          ],
+          "scale": true,
+          "scaleRange": 0.3
+        }
+      }
+    },
+    {
+      "id": "V",
+      "name": "Vibration",
+      "shapes": [
+        {
+          "type": "path",
+          "d": "M -6 0 Q -3 -3 0 0 Q 3 3 6 0",
+          "fill": "none",
+          "stroke": "#FF66AA",
+          "strokeWidth": 1
+        }
+      ],
+      "animate": {
+        "type": "vibrate",
+        "params": {
+          "speed": 0.4,
+          "amplitude": 2
+        }
+      }
+    },
+    {
+      "id": "F",
+      "name": "Frequency",
+      "shapes": [
+        {
+          "type": "path",
+          "d": "M -5 0 Q -3 -3 -1 0 Q 1 3 3 0 Q 4 -2 5 0",
+          "fill": "none",
+          "stroke": "#66CCFF",
+          "strokeWidth": 1
+        }
+      ],
+      "animate": {
+        "type": "shake",
+        "params": {
+          "speed": 0.4,
+          "amplitude": 2
+        }
+      }
+    },
+    {
+      "id": "Res",
+      "name": "Resonance",
+      "shapes": [
+        {
+          "type": "circle",
+          "cx": 0,
+          "cy": 0,
+          "r": 3,
+          "fill": "#AAFFAA"
+        }
+      ],
+      "animate": {
+        "type": "blink",
+        "params": {
+          "interval": 0.5
+        }
+      }
+    },
+    {
+      "id": "P",
+      "name": "Pattern",
+      "shapes": [
+        {
+          "type": "rect",
+          "x": -3,
+          "y": -3,
+          "width": 6,
+          "height": 6,
+          "fill": "#AA44FF"
+        }
+      ],
+      "animate": {
+        "type": "float",
+        "params": {
+          "speed": 0.3,
+          "range": 2
+        }
+      }
+    },
+    {
+      "id": "O",
+      "name": "Order",
+      "shapes": [
+        {
+          "type": "g",
+          "children": [
+            {
+              "type": "circle",
+              "cx": 0,
+              "cy": 0,
+              "r": 2,
+              "fill": "#66FF66"
+            },
+            {
+              "type": "circle",
+              "cx": 4,
+              "cy": 0,
+              "r": 2,
+              "fill": "#66FF66"
+            },
+            {
+              "type": "circle",
+              "cx": -4,
+              "cy": 0,
+              "r": 2,
+              "fill": "#66FF66"
+            }
+          ]
+        }
+      ],
+      "animate": {
+        "type": "orbit",
+        "params": {
+          "speed": 0.4,
+          "radius": 3
+        }
+      }
+    },
+    {
+      "id": "S",
+      "name": "State",
+      "shapes": [
+        {
+          "type": "circle",
+          "cx": 0,
+          "cy": 0,
+          "r": 3,
+          "fill": "#FF9999"
+        }
+      ],
+      "animate": {
+        "type": "ripple",
+        "params": {
+          "speed": 0.3,
+          "minRadius": 2,
+          "maxRadius": 5,
+          "stroke": "#FFFFFF",
+          "strokeColors": [
+            "#FF9999",
+            "#FFFFFF"
+          ]
+        }
+      }
+    },
+    {
+      "id": "Enc",
+      "name": "Encoding",
+      "shapes": [
+        {
+          "type": "rect",
+          "x": -4,
+          "y": -2,
+          "width": 8,
+          "height": 4,
+          "fill": "#FF44FF"
+        }
+      ],
+      "animate": {
+        "type": "highlight",
+        "params": {
+          "speed": 0.5,
+          "targetAttr": "stroke",
+          "highlightColor": "#FFFFFF",
+          "intensity": 0.8
+        }
+      }
+    },
+    {
+      "id": "Ent",
+      "name": "Entropy",
+      "shapes": [
+        {
+          "type": "circle",
+          "cx": 0,
+          "cy": 0,
+          "r": 3,
+          "fill": "#44FF44"
+        }
+      ],
+      "animate": {
+        "type": "pulse",
+        "params": {
+          "speed": 0.4,
+          "colors": [
+            "#44FF44",
+            "#FF4444"
+          ],
+          "scale": true,
+          "scaleRange": 0.25
+        }
+      }
+    },
+    {
+      "id": "Bit",
+      "name": "Bits",
+      "shapes": [
+        {
+          "type": "text",
+          "x": 0,
+          "y": 1,
+          "fill": "#FFFFFF",
+          "fontSize": 4,
+          "textAnchor": "middle",
+          "content": "0101"
+        }
+      ],
+      "animate": {
+        "type": "reorder",
+        "params": {
+          "speed": 0.3
+        }
+      }
+    },
+    {
+      "id": "Info",
+      "name": "Information",
+      "shapes": [
+        {
+          "type": "rect",
+          "x": -4,
+          "y": -4,
+          "width": 8,
+          "height": 8,
+          "fill": "#1E90FF"
+        },
+        {
+          "type": "text",
+          "x": 0,
+          "y": 1,
+          "textAnchor": "middle",
+          "fill": "#FFFFFF",
+          "fontSize": 3,
+          "content": "i"
+        }
+      ],
+      "animate": {
+        "type": "beat",
+        "params": {
+          "speed": 0.3,
+          "scaleRange": 0.3
+        }
       }
     }
   ],
   "edges": [
     {
-      "source": "A1",
-      "target": "A2",
-      "type": "orthogonal"
+      "source": "Field",
+      "target": "Q"
     },
     {
-      "source": "A1",
-      "target": "B1",
-      "type": "orthogonal"
+      "source": "Field",
+      "target": "E"
     },
     {
-      "source": "A1",
-      "target": "B2",
-      "type": "diagonal"
+      "source": "Q",
+      "target": "E"
     },
     {
-      "source": "A2",
-      "target": "B2",
-      "type": "orthogonal"
+      "source": "Q",
+      "target": "V"
     },
     {
-      "source": "B1",
-      "target": "B2",
-      "type": "orthogonal"
+      "source": "V",
+      "target": "F"
+    },
+    {
+      "source": "F",
+      "target": "E"
+    },
+    {
+      "source": "V",
+      "target": "Res"
+    },
+    {
+      "source": "F",
+      "target": "Res"
+    },
+    {
+      "source": "Res",
+      "target": "P"
+    },
+    {
+      "source": "P",
+      "target": "O"
+    },
+    {
+      "source": "S",
+      "target": "Ent"
+    },
+    {
+      "source": "O",
+      "target": "Ent"
+    },
+    {
+      "source": "Ent",
+      "target": "Bit"
+    },
+    {
+      "source": "Enc",
+      "target": "Bit"
+    },
+    {
+      "source": "Bit",
+      "target": "Info"
+    },
+    {
+      "source": "E",
+      "target": "S"
+    },
+    {
+      "source": "P",
+      "target": "S"
+    },
+    {
+      "source": "S",
+      "target": "Enc"
+    },
+    {
+      "source": "O",
+      "target": "Enc"
+    },
+    {
+      "source": "P",
+      "target": "Enc"
     }
   ],
   "layoutConfig": {
     "startX": 150,
-    "startY": 150,
-    "columnWidth": 250,
-    "rowHeight": 250,
+    "startY": 100,
+    "columnWidth": 300,
+    "rowHeight": 300,
     "boxWidth": 100,
     "boxHeight": 100,
     "boxMargin": 20,
-    "fontSize": 16,
-    "textMarginTop": 60,
-    "columnsPerRow": 2
+    "fontSize": 24,
+    "textMarginTop": 75,
+    "columnsPerRow": 4
   }
 }

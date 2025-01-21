@@ -1,22 +1,23 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
 import NodeIcon from "./components/NodeIcon";
 import AnimatedEdge from "./components/AnimatedEdge";
 import { arrangeInGrid } from "./utils/layoutHelper";
 
 export default function GraphEngine({ graphData }) {
   // Add render counter to track re-renders
-  const renderCount = React.useRef(0);
+  const renderCount = useRef(0);
   renderCount.current++;
 
   // Pass the entire graphData object to arrangeInGrid
-  const { nodes, config } = React.useMemo(() => {
-    return arrangeInGrid(graphData);
-  }, [graphData]);
+  const { nodes, config } = useMemo(
+    () => arrangeInGrid(graphData),
+    [graphData]
+  );
 
   // Use refs for animation values instead of state
-  const timeRef = React.useRef(0);
-  const dashOffsetRef = React.useRef(0);
-  const frameCountRef = React.useRef(0);
+  const timeRef = useRef(0);
+  const dashOffsetRef = useRef(0);
+  const frameCountRef = useRef(0);
 
   useEffect(() => {
     let frameId;
@@ -69,11 +70,9 @@ export default function GraphEngine({ graphData }) {
   // Render nodes
   const nodeElems = nodes.map((node) => {
     const { id, x, y, name } = node;
-    // Get the main config values first
-    const mainConfig = config;
-    // Then override with node-specific config if it exists
+    // Merge node config
     const nodeConfig = {
-      ...mainConfig,
+      ...config,
       ...(node.layoutConfig || {}),
     };
 

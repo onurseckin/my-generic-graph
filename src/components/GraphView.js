@@ -5,9 +5,14 @@ import { DEFAULT_CONFIG } from "../utils/layoutHelper";
 function GraphView({ data, zoom }) {
   const graphRef = useRef(null);
 
-  // Calculate minimum dimensions based on screen size
-  const minWidth = Math.max(window.innerWidth, DEFAULT_CONFIG.width);
-  const minHeight = Math.max(window.innerHeight, DEFAULT_CONFIG.height);
+  // Merged layoutConfig using DEFAULT_CONFIG so iconUnitSize is definitely present:
+  const mergedData = {
+    ...data,
+    layoutConfig: {
+      ...DEFAULT_CONFIG,
+      ...(data?.layoutConfig || {}),
+    },
+  };
 
   return (
     <div className="w-full h-full relative overflow-hidden">
@@ -18,19 +23,11 @@ function GraphView({ data, zoom }) {
           transform: `translate(-50%, -50%) scale(${zoom}) translate(50%, 50%)`,
           transformOrigin: "50% 50%",
           transition: "transform 0.2s ease-out",
-          minWidth: `${minWidth}px`,
-          minHeight: `${minHeight}px`,
+          minWidth: `${DEFAULT_CONFIG.width}px`,
+          minHeight: `${DEFAULT_CONFIG.height}px`,
         }}
       >
-        <GraphEngine
-          graphData={{
-            ...data,
-            layoutConfig: {
-              ...DEFAULT_CONFIG,
-              ...(data?.layoutConfig || {}),
-            },
-          }}
-        />
+        <GraphEngine graphData={mergedData} />
       </div>
     </div>
   );
