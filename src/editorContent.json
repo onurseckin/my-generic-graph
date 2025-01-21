@@ -5,17 +5,17 @@
       "name": "Quantum Field",
       "shapes": [
         {
-          "type": "circle",
-          "cx": 0,
-          "cy": 0,
-          "r": 3,
-          "fill": "#44AAFF"
+          "type": "path",
+          "d": "M-20,0 C-10,-10 10,-10 20,0 C10,10 -10,10 -20,0 Z M-10,0 C-5,-5 5,-5 10,0 C5,5 -5,5 -10,0 Z",
+          "fill": "#4B0082",
+          "stroke": "#9370DB",
+          "strokeWidth": 1
         }
       ],
       "animate": {
-        "type": "rotateTrio",
+        "type": "float",
         "params": {
-          "speed": 0.3
+          "range": 4
         }
       }
     },
@@ -24,37 +24,40 @@
       "name": "Quanta",
       "shapes": [
         {
-          "type": "g",
-          "children": [
-            {
-              "type": "circle",
-              "cx": -3,
-              "cy": 0,
-              "r": 2,
-              "fill": "#FFFF55"
-            },
-            {
-              "type": "circle",
-              "cx": 0,
-              "cy": 0,
-              "r": 2,
-              "fill": "#FFFF55"
-            },
-            {
-              "type": "circle",
-              "cx": 3,
-              "cy": 0,
-              "r": 2,
-              "fill": "#FFFF55"
-            }
-          ]
+          "type": "circle",
+          "cx": 8,
+          "cy": 0,
+          "r": 3,
+          "fill": "#00FFFF"
+        },
+        {
+          "type": "circle",
+          "cx": -4,
+          "cy": -6.928,
+          "r": 3,
+          "fill": "#FF00FF"
+        },
+        {
+          "type": "circle",
+          "cx": -4,
+          "cy": 6.928,
+          "r": 3,
+          "fill": "#FFB6C1"
+        },
+        {
+          "type": "path",
+          "d": "M8,0 L-4,-6.928 L-4,6.928 Z",
+          "fill": "none",
+          "stroke": "#FFFFFF",
+          "strokeWidth": 0.5,
+          "strokeDasharray": "2,2",
+          "opacity": 0.3
         }
       ],
       "animate": {
-        "type": "beat",
+        "type": "multiOrbit",
         "params": {
-          "speed": 0.3,
-          "scaleRange": 0.3
+          "radius": 8
         }
       }
     },
@@ -64,20 +67,16 @@
       "shapes": [
         {
           "type": "path",
-          "d": "M0,-4 L1,-1 L4,0 L1,1 L0,4 L-1,1 L-4,0 L-1,-1 Z",
-          "fill": "#FFDD00"
+          "d": "M0,-15 L5,-5 L15,-5 L7,2 L10,12 L0,6 L-10,12 L-7,2 L-15,-5 L-5,-5 Z",
+          "fill": "#FFFF33",
+          "stroke": "#FFA500",
+          "strokeWidth": 2
         }
       ],
       "animate": {
-        "type": "pulse",
+        "type": "constantGlow",
         "params": {
-          "speed": 0.3,
-          "colors": [
-            "#FFDD00",
-            "#FFA500"
-          ],
-          "scale": true,
-          "scaleRange": 0.3
+          "glowColor": "#FFFF33"
         }
       }
     },
@@ -87,37 +86,17 @@
       "shapes": [
         {
           "type": "path",
-          "d": "M -6 0 Q -3 -3 0 0 Q 3 3 6 0",
-          "fill": "none",
-          "stroke": "#FF66AA",
-          "strokeWidth": 1
+          "d": "M-20,0 C-15,-10 -5,10 5,-10 C15,10 20,0",
+          "stroke": "#7CFF00",
+          "strokeWidth": 2,
+          "fill": "none"
         }
       ],
       "animate": {
-        "type": "vibrate",
+        "type": "stringVibrate",
         "params": {
-          "speed": 0.4,
-          "amplitude": 2
-        }
-      }
-    },
-    {
-      "id": "F",
-      "name": "Frequency",
-      "shapes": [
-        {
-          "type": "path",
-          "d": "M -5 0 Q -3 -3 -1 0 Q 1 3 3 0 Q 4 -2 5 0",
-          "fill": "none",
-          "stroke": "#66CCFF",
-          "strokeWidth": 1
-        }
-      ],
-      "animate": {
-        "type": "shake",
-        "params": {
-          "speed": 0.4,
-          "amplitude": 2
+          "amplitude": 3,
+          "width": 40
         }
       }
     },
@@ -129,14 +108,34 @@
           "type": "circle",
           "cx": 0,
           "cy": 0,
-          "r": 3,
-          "fill": "#AAFFAA"
+          "r": 12,
+          "fill": "#9400D3",
+          "stroke": "#E6E6FA",
+          "strokeWidth": 1
+        },
+        {
+          "type": "circle",
+          "cx": 0,
+          "cy": 0,
+          "r": 8,
+          "fill": "#800080",
+          "stroke": "#E6E6FA",
+          "strokeWidth": 0.5
+        },
+        {
+          "type": "circle",
+          "cx": 0,
+          "cy": 0,
+          "r": 4,
+          "fill": "#4B0082",
+          "stroke": "#E6E6FA",
+          "strokeWidth": 0.5
         }
       ],
       "animate": {
-        "type": "blink",
+        "type": "speakerBeat",
         "params": {
-          "interval": 0.5
+          "scaleRange": 0.15
         }
       }
     },
@@ -145,19 +144,17 @@
       "name": "Pattern",
       "shapes": [
         {
-          "type": "rect",
-          "x": -3,
-          "y": -3,
-          "width": 6,
-          "height": 6,
-          "fill": "#AA44FF"
+          "type": "path",
+          "d": "M-15,-15 L-5,-15 L-5,-5 L-15,-5 Z M-2,-15 L8,-15 L8,-5 L-2,-5 Z M11,-15 L21,-15 L21,-5 L11,-5 Z M-15,-2 L-5,-2 L-5,8 L-15,8 Z M-2,-2 L8,-2 L8,8 L-2,8 Z M11,-2 L21,-2 L21,8 L11,8 Z M-15,11 L-5,11 L-5,21 L-15,21 Z M-2,11 L8,11 L8,21 L-2,21 Z M11,11 L21,11 L21,21 L11,21 Z",
+          "fill": "#DA70D6",
+          "stroke": "#FFB6C1",
+          "strokeWidth": 0.5
         }
       ],
       "animate": {
-        "type": "float",
+        "type": "shake",
         "params": {
-          "speed": 0.3,
-          "range": 2
+          "amplitude": 1
         }
       }
     },
@@ -166,37 +163,37 @@
       "name": "Order",
       "shapes": [
         {
-          "type": "g",
-          "children": [
-            {
-              "type": "circle",
-              "cx": 0,
-              "cy": 0,
-              "r": 2,
-              "fill": "#66FF66"
-            },
-            {
-              "type": "circle",
-              "cx": 4,
-              "cy": 0,
-              "r": 2,
-              "fill": "#66FF66"
-            },
-            {
-              "type": "circle",
-              "cx": -4,
-              "cy": 0,
-              "r": 2,
-              "fill": "#66FF66"
-            }
-          ]
+          "type": "rect",
+          "x": -15,
+          "y": -12,
+          "width": 30,
+          "height": 6,
+          "fill": "#FF4500",
+          "rx": 2
+        },
+        {
+          "type": "rect",
+          "x": -15,
+          "y": -2,
+          "width": 30,
+          "height": 6,
+          "fill": "#FF6347",
+          "rx": 2
+        },
+        {
+          "type": "rect",
+          "x": -15,
+          "y": 8,
+          "width": 30,
+          "height": 6,
+          "fill": "#FF8C00",
+          "rx": 2
         }
       ],
       "animate": {
-        "type": "orbit",
+        "type": "threeBarsReorder",
         "params": {
-          "speed": 0.4,
-          "radius": 3
+          "spacing": 10
         }
       }
     },
@@ -206,23 +203,31 @@
       "shapes": [
         {
           "type": "circle",
-          "cx": 0,
+          "cx": -8,
           "cy": 0,
-          "r": 3,
-          "fill": "#FF9999"
+          "r": 8,
+          "fill": "#0000FF"
+        },
+        {
+          "type": "circle",
+          "cx": 8,
+          "cy": 0,
+          "r": 8,
+          "fill": "#FF0000"
+        },
+        {
+          "type": "path",
+          "d": "M-8,-8 C0,0 0,0 8,-8 M-8,8 C0,0 0,0 8,8",
+          "stroke": "#FFFFFF",
+          "strokeWidth": 0.5,
+          "fill": "none"
         }
       ],
       "animate": {
-        "type": "ripple",
+        "type": "swapColors",
         "params": {
-          "speed": 0.3,
-          "minRadius": 2,
-          "maxRadius": 5,
-          "stroke": "#FFFFFF",
-          "strokeColors": [
-            "#FF9999",
-            "#FFFFFF"
-          ]
+          "color1": "#0000FF",
+          "color2": "#FF0000"
         }
       }
     },
@@ -231,21 +236,24 @@
       "name": "Encoding",
       "shapes": [
         {
-          "type": "rect",
-          "x": -4,
-          "y": -2,
-          "width": 8,
-          "height": 4,
-          "fill": "#FF44FF"
+          "type": "path",
+          "d": "M-20,-15 C-25,-15 -25,15 -20,15 M20,-15 C25,-15 25,15 20,15",
+          "stroke": "#20B2AA",
+          "strokeWidth": 2,
+          "fill": "none"
+        },
+        {
+          "type": "path",
+          "d": "M-10,0 L-5,-5 L0,0 L5,-5 L10,0",
+          "stroke": "#40E0D0",
+          "strokeWidth": 1.5,
+          "fill": "none"
         }
       ],
       "animate": {
-        "type": "highlight",
+        "type": "stretchX",
         "params": {
-          "speed": 0.5,
-          "targetAttr": "stroke",
-          "highlightColor": "#FFFFFF",
-          "intensity": 0.8
+          "amplitude": 0.15
         }
       }
     },
@@ -255,23 +263,42 @@
       "shapes": [
         {
           "type": "circle",
+          "cx": -12,
+          "cy": -12,
+          "r": 4,
+          "fill": "#8B0000"
+        },
+        {
+          "type": "circle",
+          "cx": 12,
+          "cy": -12,
+          "r": 4,
+          "fill": "#B22222"
+        },
+        {
+          "type": "circle",
           "cx": 0,
           "cy": 0,
-          "r": 3,
-          "fill": "#44FF44"
+          "r": 4,
+          "fill": "#DC143C"
+        },
+        {
+          "type": "circle",
+          "cx": -12,
+          "cy": 12,
+          "r": 4,
+          "fill": "#CD5C5C"
+        },
+        {
+          "type": "circle",
+          "cx": 12,
+          "cy": 12,
+          "r": 4,
+          "fill": "#FA8072"
         }
       ],
       "animate": {
-        "type": "pulse",
-        "params": {
-          "speed": 0.4,
-          "colors": [
-            "#44FF44",
-            "#FF4444"
-          ],
-          "scale": true,
-          "scaleRange": 0.25
-        }
+        "type": "randomColorChange"
       }
     },
     {
@@ -279,20 +306,44 @@
       "name": "Bits",
       "shapes": [
         {
+          "type": "rect",
+          "x": -20,
+          "y": -10,
+          "width": 16,
+          "height": 20,
+          "fill": "#1E90FF",
+          "rx": 2
+        },
+        {
+          "type": "rect",
+          "x": 4,
+          "y": -10,
+          "width": 16,
+          "height": 20,
+          "fill": "#4169E1",
+          "rx": 2
+        },
+        {
           "type": "text",
-          "x": 0,
-          "y": 1,
+          "x": -12,
+          "y": 5,
           "fill": "#FFFFFF",
-          "fontSize": 4,
+          "fontSize": 16,
           "textAnchor": "middle",
-          "content": "0101"
+          "content": "0"
+        },
+        {
+          "type": "text",
+          "x": 12,
+          "y": 5,
+          "fill": "#FFFFFF",
+          "fontSize": 16,
+          "textAnchor": "middle",
+          "content": "1"
         }
       ],
       "animate": {
-        "type": "reorder",
-        "params": {
-          "speed": 0.3
-        }
+        "type": "bitsShuffle"
       }
     },
     {
@@ -300,28 +351,24 @@
       "name": "Information",
       "shapes": [
         {
-          "type": "rect",
-          "x": -4,
-          "y": -4,
-          "width": 8,
-          "height": 8,
-          "fill": "#1E90FF"
+          "type": "circle",
+          "cx": 0,
+          "cy": 0,
+          "r": 15,
+          "fill": "#FFD700",
+          "stroke": "#DAA520",
+          "strokeWidth": 2
         },
         {
-          "type": "text",
-          "x": 0,
-          "y": 1,
-          "textAnchor": "middle",
-          "fill": "#FFFFFF",
-          "fontSize": 3,
-          "content": "i"
+          "type": "path",
+          "d": "M-2,-8 L2,-8 L2,8 L-2,8 M-2,-12 L2,-12 L2,-10 L-2,-10",
+          "fill": "#000000"
         }
       ],
       "animate": {
-        "type": "beat",
+        "type": "orbit",
         "params": {
-          "speed": 0.3,
-          "scaleRange": 0.3
+          "radius": 4
         }
       }
     }
@@ -332,10 +379,6 @@
       "target": "Q"
     },
     {
-      "source": "Field",
-      "target": "E"
-    },
-    {
       "source": "Q",
       "target": "E"
     },
@@ -344,20 +387,20 @@
       "target": "V"
     },
     {
-      "source": "V",
-      "target": "F"
-    },
-    {
-      "source": "F",
-      "target": "E"
+      "source": "E",
+      "target": "Res"
     },
     {
       "source": "V",
       "target": "Res"
     },
     {
-      "source": "F",
-      "target": "Res"
+      "source": "V",
+      "target": "O"
+    },
+    {
+      "source": "Res",
+      "target": "S"
     },
     {
       "source": "Res",
@@ -365,59 +408,49 @@
     },
     {
       "source": "P",
-      "target": "O"
+      "target": "Enc"
+    },
+    {
+      "source": "O",
+      "target": "S"
     },
     {
       "source": "S",
-      "target": "Ent"
+      "target": "Enc"
     },
     {
       "source": "O",
       "target": "Ent"
+    },
+    {
+      "source": "S",
+      "target": "Bit"
+    },
+    {
+      "source": "Enc",
+      "target": "Info"
     },
     {
       "source": "Ent",
       "target": "Bit"
     },
     {
-      "source": "Enc",
-      "target": "Bit"
-    },
-    {
       "source": "Bit",
       "target": "Info"
-    },
-    {
-      "source": "E",
-      "target": "S"
-    },
-    {
-      "source": "P",
-      "target": "S"
-    },
-    {
-      "source": "S",
-      "target": "Enc"
-    },
-    {
-      "source": "O",
-      "target": "Enc"
-    },
-    {
-      "source": "P",
-      "target": "Enc"
     }
   ],
   "layoutConfig": {
-    "startX": 150,
-    "startY": 100,
-    "columnWidth": 300,
-    "rowHeight": 300,
+    "startX": 250,
+    "startY": 250,
+    "columnWidth": 200,
+    "rowHeight": 220,
     "boxWidth": 100,
     "boxHeight": 100,
-    "boxMargin": 20,
+    "boxMargin": 5,
     "fontSize": 24,
     "textMarginTop": 75,
-    "columnsPerRow": 4
+    "columnsPerRow": 3,
+    "iconUnitSize": 1.2,
+    "maxIconSize": 1.2
   }
 }

@@ -1,18 +1,19 @@
 import React from "react";
 import { getEdgeRoute } from "../utils/boundingBox";
+import { ANIMATION_SPEEDS } from "./NodeIcon"; // Import animation speeds
 
 export default function AnimatedEdge({
   sourceNode,
   targetNode,
   allNodes,
   time = 0,
-  edge = { type: "orthogonal" },
+  edge,
   boxWidth,
   boxHeight,
   boxMargin,
 }) {
   // Get animation speed from edge config or use default
-  const speed = edge.speed || 4;
+  const speed = edge.speed || ANIMATION_SPEEDS.MEDIUM; // Use ANIMATION_SPEEDS
 
   // Get the routed path points
   const points = getEdgeRoute(sourceNode, targetNode, allNodes, edge);
