@@ -8,17 +8,16 @@ const ANIMATION_SPEEDS = {
 
 export default function NodeIcon({ node, time = 0, config }) {
   const { shapes = [], animate } = node;
-
   const {
-    svgWidth = 100,
-    svgHeight = 100,
-    viewBoxWidth = 100,
-    viewBoxHeight = 100,
-    viewBoxMinX = -50,
-    viewBoxMinY = -50,
-    boxWidth = 160,
-    boxHeight = 180,
-    boxMargin = 25,
+    boxWidth,
+    boxHeight,
+    boxMargin,
+    svgWidth = boxWidth + 2 * boxMargin,
+    svgHeight = boxHeight + 2 * boxMargin,
+    viewBoxWidth = svgWidth,
+    viewBoxHeight = svgHeight,
+    viewBoxMinX = -svgWidth / 2,
+    viewBoxMinY = -svgHeight / 2,
   } = config || {};
 
   return (
@@ -28,17 +27,17 @@ export default function NodeIcon({ node, time = 0, config }) {
       viewBox={`${viewBoxMinX} ${viewBoxMinY} ${viewBoxWidth} ${viewBoxHeight}`}
       style={{ overflow: "visible" }}
     >
-      {/* Debug border */}
+      {/* Invisible bounding box */}
       <rect
         x={-boxWidth / 2 - boxMargin}
         y={-boxHeight / 2 - boxMargin}
         width={boxWidth + 2 * boxMargin}
         height={boxHeight + 2 * boxMargin}
         fill="none"
-        stroke="rgba(255, 255, 255, 0.2)"
+        stroke="rgba(255, 255, 255, 0)"
         strokeWidth="1"
       />
-      <g transform={`translate(0,0)`}>
+      <g>
         {shapes.map((shape, i) => (
           <AnimatedShape
             key={i}

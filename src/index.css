@@ -1,8 +1,0 @@
-/* Optional global styling. 
-   We'll keep body background black in the App layout, 
-   or you can do it here if you like. */
-body {
-  margin: 0;
-  padding: 0;
-  font-family: sans-serif;
-}

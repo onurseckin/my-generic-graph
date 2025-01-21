@@ -1,45 +1,62 @@
-import React, { useState } from "react";
-import GraphEngine from "./GraphEngine";
+import React, { useState, useEffect, useCallback } from "react";
 import { formatGraphData } from "./utils/layoutHelper";
 import TextEditor from "./components/TextEditor";
 import GraphView from "./components/GraphView";
 import { useZoom } from "./hooks/useZoom";
+import { Button } from "./components/ui/button";
+import { ThemeProvider } from "./components/ThemeProvider";
+import {
+  PlayIcon,
+  SaveIcon,
+  ZoomInIcon,
+  ZoomOutIcon,
+  RefreshCwIcon,
+} from "lucide-react";
+import graphData from "./data/editorContent.json";
+import { ToastContextProvider } from "./components/ui/toast-context";
+import { useToast } from "./components/ui/toast-context";
 
 export default function App() {
+  return (
+    <ToastContextProvider>
+      <AppContent />
+    </ToastContextProvider>
+  );
+}
+
+function AppContent() {
   const { zoom, handleZoom, handleReset } = useZoom();
-  // Load and parse the JSON data
-  const [graphData, setGraphData] = useState(() => {
+  const { showToast } = useToast();
+
+  const [data, setData] = useState(() => {
     try {
-      const data = require("./editorContent.json");
-      return data || { nodes: [], edges: [], layoutConfig: {} };
+      return graphData || { nodes: [], edges: [], layoutConfig: {} };
     } catch (error) {
       return { nodes: [], edges: [], layoutConfig: {} };
     }
   });
 
-  // Add state for editor content and visualization
   const [editorContent, setEditorContent] = useState(
-    JSON.stringify(graphData, null, 2)
+    JSON.stringify(data, null, 2)
   );
-  const [visualData, setVisualData] = useState(graphData);
+  const [visualData, setVisualData] = useState(data);
 
-  const handleEditorChange = (e) => {
-    setEditorContent(e.target.value);
+  const handleEditorChange = (newContent) => {
+    setEditorContent(newContent);
   };
 
-  const handlePlay = () => {
+  const handlePlay = useCallback(() => {
     try {
-      const parsedData = JSON.parse(editorContent);
-      const formattedJson = formatGraphData(
-        JSON.stringify(parsedData, null, 2)
-      );
-      const finalData = JSON.parse(formattedJson);
-      setGraphData(finalData);
-      setVisualData(finalData);
+      const formattedJson = formatGraphData(editorContent);
+      const parsedData = JSON.parse(formattedJson);
+      setEditorContent(formattedJson);
+      setData(parsedData);
+      setVisualData(parsedData);
+      showToast("Graph rendered successfully", "success");
     } catch (error) {
-      console.error("Failed to parse or format JSON:", error);
+      showToast(error.message, "error");
     }
-  };
+  }, [editorContent, showToast]);
 
   const handleSave = async () => {
     try {
@@ -57,90 +74,83 @@ export default function App() {
 
       const result = await response.json();
       if (result.success) {
-        console.log("File saved successfully");
+        showToast("File saved successfully", "success");
       }
     } catch (e) {
-      console.error("Save Error:", e);
-      alert("Failed to save file");
+      showToast(e.message, "error");
     }
   };
 
+  useEffect(() => {
+    const handleGlobalKeyDown = (event) => {
+      if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+        handlePlay();
+      }
+    };
+
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+  }, [handlePlay]);
+
   return (
-    <div
-      style={{
-        display: "flex",
-        height: "100vh",
-        color: "white",
-        background: "black",
-      }}
-    >
-      {/* Left side - Text Editor */}
-      <div
-        style={{
-          flex: "0 0 400px",
-          padding: "1rem",
-          borderRight: "1px solid gray",
-          display: "flex",
-          flexDirection: "column",
-          height: "100%",
-          background: "#1e1e1e",
-        }}
-      >
-        {/* Buttons */}
-        <div
-          style={{
-            display: "flex",
-            gap: "1rem",
-            marginBottom: "1rem",
-          }}
-        >
-          <button
-            onClick={handlePlay}
-            style={{
-              padding: "0.5rem 1rem",
-              background: "#4CAF50",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
-          >
-            ▶ Play
-          </button>
-          <button
-            onClick={handleSave}
-            style={{
-              padding: "0.5rem 1rem",
-              background: "#2196F3",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
-          >
-            Save
-          </button>
+    <ThemeProvider>
+      <main className="flex h-screen">
+        <div className="w-2/5 min-w-[400px] border-r border-border flex flex-col h-full bg-background">
+          <div className="flex-1 min-h-0">
+            <TextEditor
+              value={editorContent}
+              onChange={handleEditorChange}
+              onZoomIn={() => handleZoom("in")}
+              onZoomReset={handleReset}
+              onZoomOut={() => handleZoom("out")}
+              onPlay={handlePlay}
+            />
+          </div>
+          <div className="shrink-0 flex justify-between items-center p-4 border-t border-border bg-background">
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleZoom("in")}
+                className="bg-background/80 backdrop-blur-sm"
+              >
+                <ZoomInIcon className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleReset}
+                className="bg-background/80 backdrop-blur-sm"
+              >
+                <RefreshCwIcon className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleZoom("out")}
+                className="bg-background/80 backdrop-blur-sm"
+              >
+                <ZoomOutIcon className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="flex gap-2">
+              <Button onClick={handlePlay} className="gap-2">
+                <PlayIcon className="h-4 w-4" />
+                Play
+              </Button>
+              <Button variant="outline" onClick={handleSave} className="gap-2">
+                <SaveIcon className="h-4 w-4" />
+                Save
+              </Button>
+            </div>
+          </div>
         </div>
 
-        <TextEditor
-          content={editorContent}
-          onChange={handleEditorChange}
-          onZoomIn={() => handleZoom("in")}
-          onZoomReset={handleReset}
-          onZoomOut={() => handleZoom("out")}
-        />
-      </div>
-
-      {/* Right side - Graph View */}
-      <div style={{ flex: 1, height: "100vh", background: "black" }}>
-        <GraphView
-          data={visualData}
-          zoom={zoom}
-          onZoomIn={() => handleZoom("in")}
-          onZoomReset={handleReset}
-          onZoomOut={() => handleZoom("out")}
-        />
-      </div>
-    </div>
+        <div className="flex-1 bg-black">
+          <GraphView data={visualData} zoom={zoom} />
+        </div>
+      </main>
+    </ThemeProvider>
   );
 }

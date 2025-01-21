@@ -1,24 +1,24 @@
 // Default grid configuration
-const DEFAULT_CONFIG = {
-  startX: 200,
-  startY: 300,
-  columnWidth: 200,
-  rowHeight: 200,
+export const DEFAULT_CONFIG = {
+  startX: 150,
+  startY: 150,
+  columnWidth: 600,
+  rowHeight: 600,
   columnsPerRow: 3, // This should be overridden by JSON config
-  width: 1500,
-  height: 1500,
+  width: 5000,
+  height: 5000,
   // Node box configuration
-  boxWidth: 120,
-  boxHeight: 120,
-  boxMargin: 25,
+  boxWidth: 100,
+  boxHeight: 100,
+  boxMargin: 50,
   // Text configuration
   fontSize: 24,
-  textMarginTop: 80,
+  textMarginTop: 20,
   // SVG viewport control
-  svgWidth: 120,
-  svgHeight: 120,
-  viewBoxWidth: 120,
-  viewBoxHeight: 120,
+  svgWidth: 100,
+  svgHeight: 100,
+  viewBoxWidth: 100,
+  viewBoxHeight: 100,
   viewBoxMinX: 0,
   viewBoxMinY: 0,
 };
@@ -83,7 +83,8 @@ export function arrangeInGrid(input = {}) {
   const result = {
     nodes: nodesArray.map((node, index) => {
       // Calculate grid positions
-      const columnsPerRow = mainLayoutConfig.columnsPerRow || 2; // Default to 2 columns if not set
+      const columnsPerRow =
+        mainLayoutConfig.columnsPerRow || DEFAULT_CONFIG.columnsPerRow;
       const row = Math.floor(index / columnsPerRow);
       const col = index % columnsPerRow;
 
@@ -124,29 +125,50 @@ export function arrangeInGrid(input = {}) {
   return result;
 }
 
-export function formatGraphData(graphData) {
+export const formatGraphData = (jsonString) => {
   try {
-    const data =
-      typeof graphData === "string" ? JSON.parse(graphData) : graphData;
+    // First clean up the input
+    let cleanJson = jsonString
+      // Remove trailing spaces in values
+      .replace(/:\s*"([^"]*?)\s+"/g, ':"$1"')
+      // Convert numeric strings to numbers (except for specific fields)
+      .replace(
+        /"(x|y|cx|cy|r|width|height|x1|x2|y1|y2|fontSize|startX|startY|columnWidth|rowHeight|boxWidth|boxHeight|boxMargin|textMarginTop|columnsPerRow)":\s*"?(-?\d+\.?\d*)"?/g,
+        '"$1":$2'
+      )
+      // Fix property names with leading spaces
+      .replace(/"\s+(\w+)":/g, '"$1":')
+      // Remove any trailing commas
+      .replace(/,(\s*[}\]])/g, "$1")
+      // Ensure text content is properly quoted
+      .replace(/"content":\s*(\d+)\s*,/g, '"content":"$1",')
+      .trim();
 
-    // Format the entire graph data
-    const formatted = {
-      nodes: data.nodes.map((node) => ({
-        ...node,
-        layoutConfig: node.layoutConfig
-          ? validateConfig(node.layoutConfig)
-          : undefined,
-      })),
-      edges: data.edges,
-      layoutConfig: validateConfig(data.layoutConfig),
+    const parsed = JSON.parse(cleanJson);
+
+    // Validate structure and ensure numeric values
+    const validatedData = {
+      nodes: Array.isArray(parsed.nodes) ? parsed.nodes : [],
+      edges: Array.isArray(parsed.edges) ? parsed.edges : [],
+      layoutConfig: {
+        startX: Number(parsed.layoutConfig?.startX) || 250,
+        startY: Number(parsed.layoutConfig?.startY) || 250,
+        columnWidth: Number(parsed.layoutConfig?.columnWidth) || 350,
+        rowHeight: Number(parsed.layoutConfig?.rowHeight) || 350,
+        boxWidth: Number(parsed.layoutConfig?.boxWidth) || 100,
+        boxHeight: Number(parsed.layoutConfig?.boxHeight) || 100,
+        boxMargin: Number(parsed.layoutConfig?.boxMargin) || 20,
+        fontSize: Number(parsed.layoutConfig?.fontSize) || 24,
+        textMarginTop: Number(parsed.layoutConfig?.textMarginTop) || 100,
+        columnsPerRow: Number(parsed.layoutConfig?.columnsPerRow) || 2,
+      },
     };
 
-    return JSON.stringify(formatted, null, 2);
+    return JSON.stringify(validatedData, null, 2);
   } catch (error) {
-    console.error("Error formatting graph data:", error);
-    return graphData;
+    throw new Error(`JSON formatting failed: ${error.message}`);
   }
-}
+};
 
 export function calculateGraphDimensions(nodes, config) {
   if (!nodes.length) return config;

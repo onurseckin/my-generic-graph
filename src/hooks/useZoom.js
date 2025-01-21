@@ -1,19 +1,16 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 
 export function useZoom(initialZoom = 1) {
   const [zoom, setZoom] = useState(initialZoom);
 
-  const handleZoom = useCallback((direction) => {
+  const handleZoom = (direction) => {
     setZoom((prev) => {
-      const delta = direction === "in" ? 0.1 : -0.1;
-      const newZoom = prev + delta;
-      return Math.max(0.1, Math.min(3, newZoom)); // Limit zoom range
+      if (direction === "in") return Math.min(prev + 0.2, 3);
+      return Math.max(prev - 0.2, 0.3);
     });
-  }, []);
+  };
 
-  const handleReset = useCallback(() => {
-    setZoom(initialZoom);
-  }, [initialZoom]);
+  const handleReset = () => setZoom(1);
 
   return { zoom, handleZoom, handleReset };
 }

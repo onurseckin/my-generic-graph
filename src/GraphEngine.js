@@ -1,22 +1,7 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useEffect } from "react";
 import NodeIcon from "./components/NodeIcon";
 import AnimatedEdge from "./components/AnimatedEdge";
-import { getEdgeRoute } from "./utils/boundingBox";
 import { arrangeInGrid } from "./utils/layoutHelper";
-
-// Generic path routing logic based on graph topology
-function shouldUseCurvedPath(source, target, pathType) {
-  if (pathType === "curved") return true;
-  if (pathType === "straight") return false;
-
-  // Default auto-routing logic
-  const dx = target.x - source.x;
-  const dy = target.y - source.y;
-  const distance = Math.sqrt(dx * dx + dy * dy);
-
-  // Use curved path for long distances or when specified by edge properties
-  return distance > 300;
-}
 
 export default function GraphEngine({ graphData }) {
   // Add render counter to track re-renders
@@ -27,8 +12,6 @@ export default function GraphEngine({ graphData }) {
   const { nodes, config } = React.useMemo(() => {
     return arrangeInGrid(graphData);
   }, [graphData]);
-
-  const { width, height, boxWidth, boxHeight, boxMargin } = config;
 
   // Use refs for animation values instead of state
   const timeRef = React.useRef(0);
@@ -64,6 +47,10 @@ export default function GraphEngine({ graphData }) {
     const targetNode = nodes.find((n) => n.id === edge.target);
     if (!sourceNode || !targetNode) return null;
 
+    // Calculate actual box dimensions from config
+    const actualBoxWidth = config.boxWidth + 2 * config.boxMargin;
+    const actualBoxHeight = config.boxHeight + 2 * config.boxMargin;
+
     return (
       <AnimatedEdge
         key={i}
@@ -72,9 +59,9 @@ export default function GraphEngine({ graphData }) {
         targetNode={targetNode}
         allNodes={nodes}
         time={timeRef.current}
-        boxWidth={boxWidth}
-        boxHeight={boxHeight}
-        boxMargin={boxMargin}
+        boxWidth={actualBoxWidth}
+        boxHeight={actualBoxHeight}
+        boxMargin={config.boxMargin}
       />
     );
   });
@@ -111,10 +98,8 @@ export default function GraphEngine({ graphData }) {
 
   return (
     <svg
-      width="100%"
-      height="100%"
-      viewBox={`0 0 ${width} ${height}`}
-      style={{ background: "black" }}
+      className="w-full h-full bg-black"
+      viewBox={`0 0 ${config.width} ${config.height}`}
     >
       <defs>
         {/* Regular white arrow marker */}
